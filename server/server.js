@@ -2,7 +2,7 @@ const path =require('path')
 const express =require('express')
 const socketIO=require('socket.io')
 const http=require('http')
-var {generateMessage} =require('./utils/message')
+var {generateMessage , generateLocationMessage} =require('./utils/message')
 
 // const { socket } = require('dgram')
 // const { text } = require('express')
@@ -30,21 +30,14 @@ socket.emit('newMessage' ,generateMessage('Admin', 'welcome to chat app'))
 socket.broadcast.emit('newMessage' , generateMessage('Admin' , 'New User Joined'))
 
 
-socket.on('creatMessage', (message) =>{
+socket.on('creatMessage', (message , callback) =>{
     console.log('creatMessage' , message)
     io.emit('newMessage' ,generateMessage(message.from , message.text));
-        
-
-
-
-
-// socket.broadcast.emit('newMessage' ,{
-//     from: message.from , 
-//     text:message.text , 
-//     createAt: new Date().getTime()
-// })
+    callback();
 })
-
+socket.on('createLocationMessage' ,(coords) =>{
+    io.emit('newLocationMessage' , generateLocationMessage('Admin' , coords.latitude ,coords.longitude))
+})
     socket.on('disconeconnect' ,() =>{
         console.log("User Was Disconnect!")
     })
