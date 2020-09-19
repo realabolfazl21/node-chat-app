@@ -3,7 +3,7 @@ const express =require('express')
 const socketIO=require('socket.io')
 const http=require('http')
 var {generateMessage , generateLocationMessage} =require('./utils/message')
-
+var {isRealString} =require('./utils/validation')
 // const { socket } = require('dgram')
 // const { text } = require('express')
 
@@ -25,9 +25,18 @@ io.on('connection' , (socket)=>{
     console.log('New User Connection!')
     
 
-socket.emit('newMessage' ,generateMessage('Admin', 'welcome to chat app'))
 
-socket.broadcast.emit('newMessage' , generateMessage('Admin' , 'New User Joined'))
+socket.on('join' ,(params,callback)=>{
+if(!isRealString(params.name) || !isRealString(params.room)){
+    callback('نام خود و اتاق مورد نظر را وارد کنید ')
+
+} 
+socket.join(params.room)
+socket.emit('newMessage' ,generateMessage('Admin', 'welcome to chat app'))
+socket.broadcast.to(params.room).emit('newMessage' , generateMessage('Admin' , `${params.name} has joined`))
+
+callback();
+})
 
 
 socket.on('creatMessage', (message , callback) =>{
